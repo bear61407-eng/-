@@ -1,0 +1,227 @@
+# -<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>酒家風雲：歲月留香 (台劇黃金年代)</title>
+    <style>
+        body {
+            background-color: #1a1412;
+            color: #f4e8c1;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #d4af37;
+            border-bottom: 2px solid #d4af37;
+            padding-bottom: 10px;
+        }
+        .status-bar {
+            background: #2c221e;
+            padding: 10px 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            border: 1px solid #554033;
+        }
+        .game-box {
+            background: #2c221e;
+            border: 1px solid #554033;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 200px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        button {
+            background-color: #5c3a21;
+            color: #fff;
+            border: 1px solid #d4af37;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        button:hover {
+            background-color: #7a4f30;
+        }
+        .egg-btn {
+            background-color: #4a2838 !important;
+            border: 1px solid #ff69b4 !important;
+        }
+        .egg-btn:hover {
+            background-color: #61354a !important;
+        }
+        .red-btn {
+            background-color: #8b0000 !important;
+            border: 1px solid #ffd700 !important;
+        }
+        .red-btn:hover {
+            background-color: #a52a2a !important;
+        }
+        .log-text {
+            color: #d1c7b7;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🏮 酒家風雲：歲月留香</h1>
+    
+    <div class="status-bar">
+        <div>💰 現金: <span id="money">50000</span> 元</div>
+        <div>🗓️ 年份: <span id="year">2001</span> 年</div>
+        <div>❤️ 當前伴隨: <span id="current-girl">無</span></div>
+    </div>
+
+    <div class="game-box" id="game-text">
+        歡迎來到充滿菸酒香與人情味的傳統老舊茶室。<br>
+        空氣中迴盪著老台語歌，今晚你想點哪一位 2001-2010 台劇黃金年代的經典紅牌坐檯？
+    </div>
+
+    <div class="btn-container" id="action-buttons">
+        <button onclick="chooseGirl('杉菜 (2001 流星花園)')">2001 杉菜</button>
+        <button onclick="chooseGirl('小希 (2002 MVP情人)')">2002 小希</button>
+        <button onclick="chooseGirl('沈銀荷 (2003 西街少年)')">2003 沈銀荷</button>
+        <button onclick="chooseGirl('小影 (2004 紫禁之巔)')">2004 小影</button>
+        <button onclick="chooseGirl('小葵 (2005 格鬥天王)')">2005 小葵</button>
+        <button onclick="chooseGirl('成曉詩 (2006 微笑Pasta)')">2006 成曉詩</button>
+        <button onclick="chooseGirl('夏之星 (2007 放羊的星星)')">2007 夏之星</button>
+        <button onclick="chooseGirl('陳欣怡 (2008 命中注定我愛你)')" class="egg-btn">✨ 彩蛋：陳欣怡 (便利貼女孩)</button>
+        <button onclick="chooseGirl('何以倩 (2009 下一站，幸福 耳科醫生)')">2009 何以倩 (耳科醫生)</button>
+        <button onclick="chooseGirl('黎薇恩 (2010 犀利人妻)')">2010 黎薇恩</button>
+        <button onclick="chooseGirl('小燕子 (鬥魚)')" class="egg-btn">✨ 彩蛋：小燕子</button>
+        <button onclick="chooseGirl('紅豆 (鬥魚)')" class="egg-btn">✨ 彩蛋：紅豆</button>
+        <button onclick="chooseGirl('雪蓮 (意難忘鎮店紅牌)')" class="red-btn">🏮 鎮店之寶：雪蓮</button>
+    </div>
+
+<script>
+    let player = {
+        money: 50000,
+        year: 2001,
+        activeGirl: null,
+        favor: 0
+    };
+
+    function updateUI() {
+        document.getElementById("money").innerText = player.money;
+        document.getElementById("year").innerText = player.year;
+        document.getElementById("current-girl").innerText = player.activeGirl ? player.activeGirl : "無";
+    }
+
+    function chooseGirl(name) {
+        player.activeGirl = name;
+        player.favor = 10;
+        updateUI();
+        
+        let desc = "";
+        
+        // 角色劇情判定
+        if(name.includes("雪蓮")) {
+            desc = `你推開包廂角落的門，雪蓮正安靜地坐在那裡。她為了幫家裡背負的龐大債務來到這裡，眼神中透著一股楚楚動人的清冷。她輕聲對你說：「老闆...今天想聽什麼歌？」`;
+        } else if(name.includes("陳欣怡")) {
+            desc = `陳欣怡唯唯諾諾地坐在沙發邊，手裡還緊緊抓著記事本。她帶著有些羞怯又善良的笑容對你說：「陳...陳董好，如果需要幫忙記事或倒酒，我隨時都可以...」`;
+        } else if(name.includes("小燕子")) {
+            desc = `小燕子眼神裡帶著不染塵埃的清澈，與這間老舊茶室的煙火氣格格不入。她有些緊張地握著手，看見你進來，露出一抹讓人心疼的乾淨微笑。`;
+        } else if(name.includes("紅豆")) {
+            desc = `紅豆一跨進包廂，那股強大的江湖氣場立刻壓過全場。她似笑非笑地看著你，熟練地點起一根菸：「怎麼，陳董今天是要來談心，還是來砸場子的？」`;
+        } else if(name.includes("何以倩")) {
+            desc = `何以倩身為專業的耳科醫生，卻意外出現在這間昏暗的茶室裡。她戴著斯文的氣質，用冷靜而銳利的眼神看著你：「需要我幫你聽聽看，你現在的心跳有多亂嗎？」`;
+        } else if(name.includes("黎薇恩")) {
+            desc = `黎薇恩坐在包廂邊緣，身上帶著一種讓人難以捉摸的神祕與脆弱感。她撥了撥頭髮，似笑非笑地對你說：「像我這種不被祝福的人，來這裡坐檯剛好而已，不是嗎？」`;
+        } else if(name.includes("杉菜")) {
+            desc = `杉菜雖然頂著雜草般不服輸的倔強眼神，但為了生活還是默默擦拭著桌子。她咬著唇對你說：「不管環境怎麼變，我才不會輕易認輸！」`;
+        } else if(name.includes("小希")) {
+            desc = `小希身上帶著一股為了籃球夢與生活奔波的青春活力，雖然滿臉疲憊，但笑起來依然陽光。`;
+        } else if(name.includes("沈銀荷")) {
+            desc = `沈銀荷坐在角落把玩著打火機，眼神冷冷地看著你。西街小辣椒的野性在她身上表露無遺。`;
+        } else if(name.includes("小影")) {
+            desc = `小影為了舞蹈夢想在現實邊緣掙扎，身段柔軟卻帶著骨子裡的倔強。`;
+        } else if(name.includes("小葵")) {
+            desc = `小葵個性豪爽、帶點江湖氣，跟她喝酒就像跟兄弟一樣痛快！`;
+        } else if(name.includes("成曉詩")) {
+            desc = `成曉詩總是笑臉迎人，嘴裡念著微笑 Pasta 的口號，彷彿再大的打擊都能笑著面對。`;
+        } else if(name.includes("夏之星")) {
+            desc = `夏之星聰明伶俐、手巧心細，一邊做著飾品一邊機靈地打量著你這個大客。`;
+        } else {
+            desc = `今晚 ${name} 正招呼著客人，看見你來了，她微微點頭，眼神裡帶著一絲不易察覺的疲憊與期待。`;
+        }
+
+        document.getElementById("game-text").innerHTML = `<p class="log-text"><b>【你點了：${name}】</b></p><p>${desc}</p>`;
+        
+        document.getElementById("action-buttons").innerHTML = `
+            <button onclick="actionInteract('drink')">🥂 花大錢開酒 / 狂歡 (-$5,000)</button>
+            <button onclick="actionInteract('talk')">💬 聽她吐苦水聊心事 (-$2,000)</button>
+            <button onclick="resetLobby()">🚪 結帳換檯</button>
+        `;
+    }
+
+    function actionInteract(type) {
+        if(type === 'drink') {
+            if(player.money < 5000) { alert("錢不夠啦！"); return; }
+            player.money -= 5000;
+            player.favor += 20;
+            document.getElementById("game-text").innerHTML += `<br><p>🥂 你豪邁地開了貴重的洋酒，${player.activeGirl} 對你的好感大增！ (好感度: ${player.favor})</p>`;
+        } else if(type === 'talk') {
+            if(player.money < 2000) { alert("錢不夠啦！"); return; }
+            player.money -= 2000;
+            player.favor += 30;
+            document.getElementById("game-text").innerHTML += `<br><p>💬 你靜靜聽著她訴說命運的苦楚，她感動得紅了眼眶。 (好感度: ${player.favor})</p>`;
+        }
+
+        updateUI();
+
+        if(player.favor >= 60) {
+            document.getElementById("game-text").innerHTML += `<br><p style="color: #ffd700;"><b>💍 【重大轉折事件】</b><br>${player.activeGirl} 的命運終於在你的長期照顧下看見曙光，她低頭害羞地問你：「如果有一天我離開這裡...你會娶我嗎？」</p>`;
+            document.getElementById("action-buttons").innerHTML = `
+                <button onclick="retireEnding()">🎉 幫她贖身，風光結婚引退！</button>
+                <button onclick="resetLobby()">繼續過日子</button>
+            `;
+        }
+    }
+
+    function retireEnding() {
+        document.getElementById("game-text").innerHTML = `<h3>🏆 【完美結局 : 幸福引退】</h3><p>你砸下重金幫 ${player.activeGirl} 處理好了一切，她流著淚脫下了酒家禮服。在眾人的祝福下，你們攜手離開了這個充滿煙塵的舊江湖，迎向嶄新的人生！</p>`;
+        document.getElementById("action-buttons").innerHTML = `<button onclick="location.reload()">重新開局</button>`;
+    }
+
+    function resetLobby() {
+        player.activeGirl = null;
+        player.favor = 0;
+        updateUI();
+        document.getElementById("game-text").innerHTML = "你結了帳，走出包廂來到大廳。今晚燈光昏黃，還有誰要坐檯？";
+        document.getElementById("action-buttons").innerHTML = `
+            <button onclick="chooseGirl('杉菜 (2001 流星花園)')">2001 杉菜</button>
+            <button onclick="chooseGirl('小希 (2002 MVP情人)')">2002 小希</button>
+            <button onclick="chooseGirl('沈銀荷 (2003 西街少年)')">2003 沈銀荷</button>
+            <button onclick="chooseGirl('小影 (2004 紫禁之巔)')">2004 小影</button>
+            <button onclick="chooseGirl('小葵 (2005 格鬥天王)')">2005 小葵</button>
+            <button onclick="chooseGirl('成曉詩 (2006 微笑Pasta)')">2006 成曉詩</button>
+            <button onclick="chooseGirl('夏之星 (2007 放羊的星星)')">2007 夏之星</button>
+            <button onclick="chooseGirl('陳欣怡 (2008 命中注定我愛你)')" class="egg-btn">✨ 彩蛋：陳欣怡 (便利貼女孩)</button>
+            <button onclick="chooseGirl('何以倩 (2009 下一站，幸福 耳科醫生)')">2009 何以倩 (耳科醫生)</button>
+            <button onclick="chooseGirl('黎薇恩 (2010 犀利人妻)')">2010 黎薇恩</button>
+            <button onclick="chooseGirl('小燕子 (鬥魚)')" class="egg-btn">✨ 彩蛋：小燕子</button>
+            <button onclick="chooseGirl('紅豆 (鬥魚)')" class="egg-btn">✨ 彩蛋：紅豆</button>
+            <button onclick="chooseGirl('雪蓮 (意難忘鎮店紅牌)')" class="red-btn">🏮 鎮店之寶：雪蓮</button>
+        `;
+    }
+</script>
+
+</body>
+</html>
