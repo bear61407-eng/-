@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>台劇茶館模擬人生 — 成人預覽</title>
+<style>
+:root{--bg:#0f0b0a;--panel:#181213;--muted:#d6ccb9;--gold:#d4af37;}
+body{background:var(--bg);color:#efe6d1;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0 auto;max-width:980px;padding:24px;}
+h1{color:var(--gold);text-align:center;border-bottom:2px solid var(--gold);padding-bottom:10px;margin-bottom:16px;}
+.status{display:flex;gap:12px;justify-content:space-between;background:var(--panel);border:1px solid #43362f;padding:12px;border-radius:8px;margin-bottom:16px;flex-wrap:wrap}
+.box{background:var(--panel);border:1px solid #43362f;padding:18px;border-radius:8px;margin-bottom:14px}
+.btns{display:flex;flex-direction:column;gap:10px;max-height:420px;overflow:auto;padding-right:6px}
+button{background:#4f3626;color:#fff;border:1px solid #caa83f;padding:10px 12px;border-radius:6px;cursor:pointer;text-align:left;font-weight:700}
+button:hover{background:#6a4b32}
+.small{font-size:0.95rem;color:#cfc1a8}
+.note{color:#d6ccb9}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999}
+.modal{background:#0f0b09;color:#efe6d1;padding:20px;border-radius:8px;max-width:640px;width:94%;border:1px solid #43362f}
+input,textarea{padding:8px;border-radius:6px;border:1px solid #333;background:#0f0b09;color:#efe6d1;width:100%}
+.savebar{display:flex;gap:8px;align-items:center}
+.stat{display:flex;gap:12px;flex-wrap:wrap}
+.stat .item{background:#241d1b;padding:8px 10px;border-radius:6px;border:1px solid #3b2f2b}
+.footer{font-size:0.9rem;color:#bfb29a;margin-top:12px}
+</style>
+</head>
+<body>
+
+<!-- Age gate (self-declare adult) -->
+<div id="ageGate" class="modal-backdrop">
+  <div class="modal">
+    <h2>警告 — 成人內容（18+）</h2>
+    <p class="note">本作品為成人向情節與職場倫理模擬，角色皆為成年人。內容含社會議題（性工作背景、職涯轉型、名聲與權力衝突），以含蓄文字呈現，不含露骨或教唆未成年行為。未滿 18 歲者請勿進入。</p>
+    <div style="margin-top:12px">
+      <label><input type="checkbox" id="confirmAdult"> 我已年滿 18 歲，並願意繼續閱讀。</label>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px;">
+      <button onclick="enterSite()">進入 / Enter</button>
+      <button onclick="stayAway()">離開 / Exit</button>
+    </div>
+  </div>
+</div>
+
+<h1>台劇茶館模擬人生 — 成人版</h1>
+
+<div class="status box">
+  <div>
+    <div class="small">玩家：<span id="playerName">訪客</span></div>
+    <div class="small">身份標記：<span id="pastJobLabel">（成年）</span></div>
+  </div>
+  <div class="stat">
+    <div class="item">名聲: <span id="fame">0</span></div>
+    <div class="item">關係: <span id="relations">0</span></div>
+    <div class="item">精神: <span id="sanity">50</span></div>
+    <div class="item">經驗: <span id="xp">0</span></div>
+  </div>
+</div>
+
+<div class="box" id="scene">
+  <p class="note">（示範章節）你站在復古小劇場的後台，牆上掛著過去的海報與泛黃的劇照。今晚的主題是「重啟」，你遇見小蓉——她曾在海邊做過檳榔西施，現在努力轉型成舞台表演者。你可以選擇如何幫助她或如何在這個場所發展你的人生路。</p>
+
+  <div class="btns" id="choices">
+    <button onclick="choose('help_connect')">幫她聯絡製作人，爭取一場試演（名聲↑，風險↑）</button>
+    <button onclick="choose('train')">先安排試鏡與訓練，慢慢建立口碑（精神↑，名聲慢升）</button>
+    <button onclick="choose('public_story')">建議她公開過去的故事以換取同情與曝光（關係/名聲波動）</button>
+    <button onclick="choose('stay_low')">保持低調處理流言，不公開過去（安全↑，進度慢）</button>
+  </div>
+</div>
+
+<div class="box">
+  <div class="savebar">
+    <button onclick="saveGame()">儲存進度</button>
+    <button onclick="loadGame()">讀取進度</button>
+    <button onclick="exportSave()">匯出進度 (JSON)</button>
+    <button onclick="importSave()">匯入進度</button>
+    <button onclick="resetGame()">重新開始</button>
+    <button onclick="toggleMusic()">音樂開關</button>
+    <button onclick="openPause()">暫停</button>
+  </div>
+  <div id="log" class="note" style="margin-top:12px">遊戲日誌：</div>
+</div>
+
+<div class="box">
+  <h3>成就 / 任務</h3>
+  <div id="achievements" class="small note">尚未達成成就</div>
+</div>
+
+<div class="footer">提示：本遊戲為成人向情節模擬，若內容觸發不適，請使用暫停或尋求支援資源。</div>
+
+<!-- Pause modal -->
+<div id="pauseModal" class="modal-backdrop" style="display:none">
+  <div class="modal">
+    <h3>已暫停</h3>
+    <p class="muted">若感到不適，請暫停並尋求協助：校內／在地衛生所或專業諮商。內容含成人議題，建議成年者在自身舒適範圍內體驗。</p>
+    <div style="margin-top:12px"><button onclick="closePause()">返回遊戲</button></div>
+  </div>
+</div>
+
+<!-- Background audio (placeholder) -->
+<audio id="bgm" loop src=""></audio>
+
+<script>
+// initial state
+const stateKey = 'tea_sim_save_v1';
+let state = {
+  name: '訪客',
+  pastJob: '檳榔小姐（成年過往）',
+  fame: 0,
+  relations: 0,
+  sanity: 50,
+  xp: 0,
+  achievements: []
+};
+
+function enterSite(){
+  const cb = document.getElementById('confirmAdult');
+  if(!cb.checked){ alert('請先勾選確認你已年滿18歲。'); return; }
+  document.getElementById('ageGate').style.display='none';
+  initUI();
+}
+function stayAway(){ window.location.href='about:blank'; }
+
+function initUI(){
+  updateStats();
+  document.getElementById('playerName').innerText = state.name;
+  document.getElementById('pastJobLabel').innerText = state.pastJob;
+  log('遊戲開始：你來到小劇場，故事展開。');
+}
+
+function updateStats(){
+  document.getElementById('fame').innerText = state.fame;
+  document.getElementById('relations').innerText = state.relations;
+  document.getElementById('sanity').innerText = state.sanity;
+  document.getElementById('xp').innerText = state.xp;
+}
+
+function log(text){
+  const el = document.getElementById('log');
+  el.innerHTML += '<div style="margin-top:6px">' + text + '</div>';
+  el.scrollTop = el.scrollHeight;
+}
+
+function choose(action){
+  if(action==='help_connect'){
+    state.fame += 15; state.relations += 5; state.sanity -= 10; state.xp += 10;
+    log('你決定幫小蓉聯絡製作人。這可能帶來曝光也可能招來流言。');
+  } else if(action==='train'){
+    state.sanity += 8; state.xp += 8; state.fame += 3;
+    log('你幫小蓉安排訓練與試鏡，注重長期發展。');
+  } else if(action==='public_story'){
+    state.relations += 10; state.fame += 20; state.sanity -= 15; state.xp += 12;
+    log('小蓉公開過去的故事，獲得部分同情與輿論，但也帶來壓力。');
+  } else if(action==='stay_low'){
+    state.sanity += 5; state.xp += 4; state.fame -= 2; state.relations += 1;
+    log('你們選擇低調應對流言，慢慢打穩根基。');
+  }
+  checkAchievements();
+  updateStats();
+}
+
+function checkAchievements(){
+  const ach = document.getElementById('achievements');
+  let list = [];
+  if(state.xp>=10 && !state.achievements.includes('起步')){ state.achievements.push('起步'); list.push('達成：起步（開始累積經驗）'); }
+  if(state.fame>=20 && !state.achievements.includes('曝光')){ state.achievements.push('曝光'); list.push('達成：曝光（名聲提升）'); }
+  if(state.sanity>=60 && !state.achievements.includes('心靈穩定')){ state.achievements.push('心靈穩定'); list.push('達成：心靈穩定（精神值提升）'); }
+  if(list.length) log(list.join('<br>'));
+  ach.innerText = state.achievements.length ? state.achievements.join(', ') : '尚未達成成就';
+}
+
+function saveGame(){
+  localStorage.setItem(stateKey, JSON.stringify(state));
+  log('已儲存進度。');
+}
+function loadGame(){
+  const s = localStorage.getItem(stateKey);
+  if(!s){ alert('沒有儲存資料'); return; }
+  state = JSON.parse(s);
+  updateStats(); document.getElementById('playerName').innerText = state.name; document.getElementById('pastJobLabel').innerText = state.pastJob; document.getElementById('achievements').innerText = state.achievements.join(', ');
+  log('已讀取進度。');
+}
+function exportSave(){
+  const data = JSON.stringify(state, null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'tea_sim_save.json'; a.click();
+  URL.revokeObjectURL(url);
+}
+function importSave(){
+  const input = document.createElement('input'); input.type='file'; input.accept='.json'; input.onchange = e => {
+    const file = e.target.files[0]; const reader = new FileReader(); reader.onload = ev => { try{ state = JSON.parse(ev.target.result); updateStats(); log('已匯入進度。'); }catch(err){ alert('匯入失敗'); } }; reader.readAsText(file);
+  }; input.click();
+}
+
+function resetGame(){ if(confirm('確定要重新開始？')){ state = {name:'訪客', pastJob:'檳榔小姐（成年過往）', fame:0, relations:0, sanity:50, xp:0, achievements:[]}; updateStats(); document.getElementById('log').innerHTML='遊戲日誌：'; document.getElementById('achievements').innerText='尚未達成成就'; }}
+
+function toggleMusic(){ const bgm=document.getElementById('bgm'); if(bgm.src===''){ alert('目前為示範音軌，實際部署請替換授權音源'); bgm.src=''; return; } if(bgm.paused) bgm.play(); else bgm.pause(); }
+
+function openPause(){ document.getElementById('pauseModal').style.display='flex'; }
+function closePause(){ document.getElementById('pauseModal').style.display='none'; }
+
+// auto enter if previously confirmed
+window.onload = () => {
+  // keep age gate visible until checked
+};
+</script>
+
+</body>
+</html>
